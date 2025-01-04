@@ -19,6 +19,11 @@ export const setupServer = async () => {
   // Роутинг
   app.use("/contacts", contactsRouter);
 
+  // Додаємо обробник для кореневого маршруту
+  app.get('/', (req, res) => {
+  res.send('Welcome to the Contacts API');
+  });
+
   // Обробка неіснуючих маршрутів
   app.use(notFoundHandler);
 
