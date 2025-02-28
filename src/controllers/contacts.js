@@ -40,8 +40,6 @@ export const getAllContacts = async (req, res, next) => {
   }
 };
 
-
-
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
   const contact = await contactsService.getContactById(contactId);

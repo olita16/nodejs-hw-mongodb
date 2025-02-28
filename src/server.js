@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
-import contactsRouter from './routes/contacts.js';
+import router from './routes/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
@@ -15,7 +15,8 @@ export const setupServer = async () => {
   app.use(express.json());
   app.use(pino());
 
-  app.use('/contacts', contactsRouter);
+  // app.use('/contacts', contactsRouter);
+  app.use('/', router);
 
   app.get('/', (req, res) => {
     res.send('Welcome to the Contacts API');
