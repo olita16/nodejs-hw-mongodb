@@ -9,30 +9,13 @@ export const getContactById = async (contactId) => {
 };
 
 export const createContact = async (contactData) => {
-  const newContact = new Contact(contactData);
-  await newContact.save();
-  return newContact;
+  return await Contact.create(contactData);
 };
 
 export const updateContact = async (contactId, contactData) => {
-  const contact = await Contact.findById(contactId);
-
-  if (!contact) {
-    throw new Error('Contact not found');
-  }
-
-  Object.assign(contact, contactData);
-  await contact.save();
-
-  return contact;
+  return await Contact.findByIdAndUpdate(contactId, contactData, { new: true });
 };
 
 export const deleteContact = async (contactId) => {
-  const contact = await Contact.findById(contactId);
-
-  if (!contact) {
-    throw new Error('Contact not found');
-  }
-
-  await Contact.deleteOne({ _id: contactId });
+  return await Contact.findByIdAndDelete(contactId);
 };
