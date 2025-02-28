@@ -49,7 +49,7 @@ export const updateContact = async (req, res, next) => {
   res.json({
     status: 200,
     message: `Successfully patched a contact!`,
-    data: result.student,
+    data: result,
   });
 };
 
@@ -59,7 +59,7 @@ export const deleteContact = async (req, res) => {
   const contact = await contactsService.getContactById(contactId);
 
   if (!contact) {
-    throw createError(404, 'Contact not found');
+    throw createHttpError(404, 'Contact not found');
   }
 
   await contactsService.deleteContact(contactId);
