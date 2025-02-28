@@ -1,15 +1,46 @@
 import createHttpError from 'http-errors';
 import * as contactsService from '../services/contacts.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
 
-export const getAllContacts = async (req, res) => {
-  const contacts = await contactsService.getAllContacts();
+export const getAllContacts = async (req, res, next) => {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query); 
 
-  res.status(200).json({
-    status: 200,
-    message: 'Successfully found contacts!',
-    data: contacts,
-  });
+  const { type, isFavourite } = req.query;
+
+  const filters = {};
+
+
+  if (type) {
+    filters.contactType = type;
+  }
+
+  if (isFavourite !== undefined) {
+    filters.isFavourite = isFavourite === 'true';
+  }
+
+  try {
+
+    const contacts = await contactsService.getAllContacts({
+      page,
+      perPage,
+      sortBy,
+      sortOrder,
+      filters,
+    });
+
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully found contacts!',
+      data: contacts,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
+
+
 
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
@@ -49,7 +80,7 @@ export const updateContact = async (req, res, next) => {
   res.json({
     status: 200,
     message: `Successfully patched a contact!`,
-    data: result.student,
+    data: result,
   });
 };
 
@@ -59,7 +90,7 @@ export const deleteContact = async (req, res) => {
   const contact = await contactsService.getContactById(contactId);
 
   if (!contact) {
-    throw createError(404, 'Contact not found');
+    throw createHttpError(404, 'Contact not found');
   }
 
   await contactsService.deleteContact(contactId);

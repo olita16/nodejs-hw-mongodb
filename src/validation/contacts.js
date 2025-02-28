@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-export const contactSchema = Joi.object({
+export const createContactSchema = Joi.object({
   name: Joi.string().min(3).max(20).required().messages({
     'string.base': 'Name must be a string',
     'string.empty': 'Name cannot be empty',
@@ -16,7 +16,7 @@ export const contactSchema = Joi.object({
   }),
 
   phoneNumber: Joi.string()
-    .pattern(/^\+?\d{10,15}$/)
+    .pattern(/^\+\d{12}$/)
     .required()
     .messages({
       'string.base': 'Phone number must be a string',
@@ -32,4 +32,18 @@ export const contactSchema = Joi.object({
     .messages({
       'any.only': 'Contact type must be one of "personal","home" or "work"',
     }),
+});
+
+export const updateContactSchema = Joi.object({
+  name: Joi.string().min(3).max(20),
+  phoneNumber: Joi.string()
+    .pattern(/^\+\d{12}$/) // Формат +380000000000
+    .messages({
+      'any.required': 'Phone number is required',
+      'string.empty': 'Phone number cannot be empty',
+      'string.pattern.base': 'Phone number must be in the format +380000000000',
+    }),
+  email: Joi.string().min(3).max(20),
+  isFavourite: Joi.boolean(),
+  contactType: Joi.string().valid('work', 'home', 'personal'),
 });

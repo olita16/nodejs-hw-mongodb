@@ -3,6 +3,7 @@ import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import * as contactsController from '../controllers/contacts.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { createContactSchema, updateContactSchema } from '../validation/contacts.js';
 
 const router = express.Router();
 
@@ -14,13 +15,13 @@ router.get(
 );
 router.post(
   '/',
-  validateBody(contactSchema),
+  validateBody(createContactSchema),
   ctrlWrapper(contactsController.createContact),
 );
 router.patch(
   '/:contactId',
   isValidId,
-  validateBody(contactSchema),
+  validateBody(updateContactSchema),
   ctrlWrapper(contactsController.updateContact),
 );
 router.delete(
