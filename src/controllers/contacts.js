@@ -87,40 +87,6 @@ export const createContact = async (req, res, next) => {
   });
 };
 
-// export const updateContact = async (req, res, next) => {
-//   const userId = req.user._id;
-//   if (!userId) {
-//     throw createHttpError(400, 'User is not authenticated');
-//   }
-//   const { contactId } = req.params;
-//   const photo = req.file;
-//   let photoUrl;
-
-//   if (photo) {
-//     if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
-//       photoUrl = await saveFileToCloudinary(photo);
-//     } else {
-//       photoUrl = await saveFileToUploadDir(photo);
-//     }
-//   }
-
-//   const result = await contactsService.updateContact(contactId, userId, {
-//     ...req.body,
-//     photo: photoUrl,
-//   });
-
-//   if (!result) {
-//     next(createHttpError(404, 'Contact not found'));
-//     return;
-//   }
-
-//   res.json({
-//     status: 200,
-//     message: `Successfully patched a contact!`,
-//     data: result.contact,
-//   });
-// };
-
 export const updateContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
