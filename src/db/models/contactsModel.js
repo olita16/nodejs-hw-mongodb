@@ -1,7 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-
-
 const contactsSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -19,6 +17,7 @@ const contactsSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    photo: { type: String },
   },
   { timestamps: true, versionKey: false },
 );

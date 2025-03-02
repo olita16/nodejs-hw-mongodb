@@ -2,6 +2,9 @@ import createHttpError from 'http-errors';
 import * as contactsService from '../services/contacts.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { getEnvVar } from '../utils/getEnvVar.js';
 
 export const getAllContacts = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -56,28 +59,55 @@ export const getContactById = async (req, res) => {
   });
 };
 
-export const createContact = async (req, res) => {
+export const createContact = async (req, res, next) => {
   const userId = req.user._id;
-  const newContactData = { ...req.body, userId };
+  if (!userId) {
+    throw createHttpError(400, 'User is not authenticated');
+  }
+  const photo = req.file;
+  let photoUrl;
 
-  const newContact = await contactsService.createContact(newContactData);
+  if (photo) {
+    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
 
+  const contact = await contactsService.createContact({
+    ...req.body,
+    userId,
+    photo: photoUrl,
+  });
   res.status(201).json({
     status: 201,
-    message: 'Successfully created a contact!',
-    data: newContact,
+    message: `Successfully created a contact!`,
+    data: contact,
   });
 };
 
 export const updateContact = async (req, res, next) => {
-  const { contactId } = req.params;
   const userId = req.user._id;
+  if (!userId) {
+    throw createHttpError(400, 'User is not authenticated');
+  }
+  const { contactId } = req.params;
+  const photo = req.file;
+  let photoUrl;
 
-  const result = await contactsService.updateContact(
-    contactId,
-    req.body,
-    userId,
-  );
+  if (photo) {
+    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+      photoUrl = await saveFileToCloudinary(photo);
+    } else {
+      photoUrl = await saveFileToUploadDir(photo);
+    }
+  }
+
+  const result = await updateContact(contactId, userId, {
+    ...req.body,
+    photo: photoUrl,
+  });
 
   if (!result) {
     next(createHttpError(404, 'Contact not found'));
@@ -87,7 +117,7 @@ export const updateContact = async (req, res, next) => {
   res.json({
     status: 200,
     message: `Successfully patched a contact!`,
-    data: result,
+    data: result.contact,
   });
 };
 
@@ -105,4 +135,3 @@ export const deleteContact = async (req, res) => {
 
   res.status(204).send();
 };
-
