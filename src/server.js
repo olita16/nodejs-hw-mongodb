@@ -8,6 +8,8 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
 
+import { UPLOAD_DIR } from './constants/index.js';
+
 const PORT = process.env.PORT || 3000;
 
 export const setupServer = async () => {
@@ -17,7 +19,8 @@ export const setupServer = async () => {
   app.use(express.json());
   app.use(cookieParser());
 
-  // app.use('/contacts', contactsRouter);
+  app.use('/uploads', express.static(UPLOAD_DIR));
+
   app.use('/', router);
 
   app.get('/', (req, res) => {
