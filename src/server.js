@@ -9,6 +9,7 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import { initMongoConnection } from './db/initMongoConnection.js';
 
 import { UPLOAD_DIR } from './constants/index.js';
+import swaggerDocs from './middlewares/swaggerDocs.js';
 
 const PORT = process.env.PORT || 3000;
 
@@ -20,6 +21,7 @@ export const setupServer = async () => {
   app.use(cookieParser());
 
   app.use('/uploads', express.static(UPLOAD_DIR));
+  app.use('/api-docs', swaggerDocs());
 
   app.use('/', router);
 
