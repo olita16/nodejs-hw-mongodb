@@ -49,3 +49,4 @@ export const updateContact = async (contactId, contactData, userId,) => {
 export const deleteContact = async (contactId,  userId) => {
   return await Contact.findOneAndDelete({ _id: contactId, userId });
 };
+

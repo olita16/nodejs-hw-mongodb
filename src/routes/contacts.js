@@ -18,6 +18,7 @@ contactRouter.get(
   isValidId,
   ctrlWrapper(contactsController.getContactById),
 );
+
 contactRouter.post(
   '/',
   validateBody(createContactSchema),
