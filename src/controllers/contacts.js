@@ -10,7 +10,7 @@ export const getAllContacts = async (req, res, next) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query);
   const { type, isFavourite } = req.query;
-  const userId = req.user.id;
+  const userId = req.user._id;
   const filters = {};
 
   if (type) {
@@ -43,11 +43,10 @@ export const getAllContacts = async (req, res, next) => {
 
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user._id;
 
   const contact = await contactsService.getContactById(contactId, userId);
 
-  // 2. Створюємо та налаштовуємо помилку за умовою ДЗ
   if (!contact) {
     throw createHttpError(404, 'Contact not found');
   }
@@ -88,42 +87,43 @@ export const createContact = async (req, res, next) => {
 };
 
 export const updateContact = async (req, res, next) => {
-  const userId = req.user._id;
-  if (!userId) {
-    throw createHttpError(400, 'User is not authenticated');
-  }
-  const { contactId } = req.params;
-  const photo = req.file;
-  let photoUrl;
+  try {
+    const { contactId } = req.params;
+    const userId = req.user._id;
+    const photo = req.file;
 
-  if (photo) {
-    if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
-      photoUrl = await saveFileToCloudinary(photo);
-    } else {
-      photoUrl = await saveFileToUploadDir(photo);
+    let photoUrl;
+
+    if (photo) {
+      if (getEnvVar('ENABLE_CLOUDINARY') === 'true') {
+        photoUrl = await saveFileToCloudinary(photo);
+      } else {
+        photoUrl = await saveFileToUploadDir(photo);
+      }
     }
+
+    const updatedData = {
+      ...req.body,
+      photo: photoUrl,
+    };
+
+    const contact = await contactsService.updateContact(contactId, userId, updatedData);
+
+    if (!contact) throw createHttpError(404, 'Contact not found');
+
+    res.status(200).json({
+      status: 200,
+      message: 'Contact updated!',
+      data: contact,
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const result = await updateContact(contactId, userId, {
-    ...req.body,
-    photo: photoUrl,
-  });
-
-  if (!result) {
-    next(createHttpError(404, 'Contact not found'));
-    return;
-  }
-
-  res.json({
-    status: 200,
-    message: `Successfully patched a contact!`,
-    data: result.contact,
-  });
 };
 
 export const deleteContact = async (req, res) => {
   const { contactId } = req.params;
-  const userId = req.user.id;
+  const userId = req.user._id;
 
   const contact = await contactsService.getContactById(contactId, userId);
 
